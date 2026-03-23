@@ -2,7 +2,7 @@
 
 > *pax* (Latin): **peace** · *pax* (English pronunciation): **packs**
 
-PAX is the official package manager for the [XCX 2.0](https://github.com/xcx-lang/xcx) programming language. It handles project scaffolding, dependency management, and running XCX applications — all from a single tool integrated directly into the XCX compiler.
+PAX is the official package manager for the [XCX 2.1](https://github.com/xcx-lang/xcx) programming language. It handles project scaffolding, dependency management, and running XCX applications — all from a single tool integrated directly into the XCX compiler.
 
 ---
 
