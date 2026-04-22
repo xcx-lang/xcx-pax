@@ -1,184 +1,68 @@
-# PAX — Package Manager for XCX
+# PAX Package Manager Manual (v3.0)
 
-> *pax* (Latin): **peace** · *pax* (English pronunciation): **packs**
+PAX is the official package manager for XCX, providing project scaffolding, dependency management with version pinning, and a professional registry integration.
 
-PAX is the official package manager for the [XCX 2.1](https://github.com/xcx-lang/xcx) programming language. It handles project scaffolding, dependency management, and running XCX applications — all from a single tool integrated directly into the XCX compiler.
+## Project Configuration: `project.pax`
 
----
-
-## Features
-
-- **Project scaffolding** — generate a ready-to-run project structure in one command
-- **Dependency management** — install, add, and remove packages from GitHub or any URL
-- **GitHub search** — discover XCX packages without leaving your terminal
-- **Zero config** — a single `project.pax` file is all you need
-- **Built in XCX** — PAX itself is written in XCX 2.0
-
----
-
-## Installation
-
-PAX ships with the XCX compiler. No separate installation is required.
-
-```bash
-xcx pax --help
-```
-
----
-
-## Quick Start
-
-```bash
-# Create a new project
-xcx pax new MyApp
-cd MyApp
-
-# Add a dependency
-xcx pax add xcx-lang/xcx-math
-
-# Run the project
-xcx pax run
-```
-
----
-
-## Commands
-
-| Command | Description |
-|---|---|
-| `xcx pax new <name>` | Create a new project with a standard directory structure |
-| `xcx pax install` | Install all dependencies listed in `project.pax` |
-| `xcx pax add <url\|user/repo>` | Add a package and save it to `project.pax` |
-| `xcx pax remove <name>` | Remove a package from `project.pax` |
-| `xcx pax search <query>` | Search GitHub for XCX packages |
-| `xcx pax run [path]` | Run the project (defaults to `src/main.xcx`) |
-
----
-
-## project.pax
-
-Every PAX project contains a `project.pax` configuration file in the root directory.
+Every PAX project is centered around a `project.pax` file. It uses a custom declarative format supporting professional metadata.
 
 ```pax
 ---
 PAX Project Configuration
 *---
 /
-    name :: "my_project",
-    deps :: [
-        "xcx-lang/xcx-math",
-        "https://example.com/some-library.xcx"
+    name        :: "my_project",
+    version     :: "1.0.0",
+    author      :: "DeveloperName",
+    description :: "A quick description of the project library.",
+    main        :: "src/app.xcx",          --- Custom entry point (optional)
+    tags        :: ["math", "utility"],
+    deps        :: [
+        "mathlib@1.2.0",            --- Pin to specific version
+        "user/repo",                --- GitHub shortcut (latest)
+        "https://domain.com/lib.xcx" --- Direct URL
     ]
 /
 ```
 
-| Field | Type | Description |
-|---|---|---|
-| `name` | string | The name of your project |
-| `deps` | list | Dependencies as GitHub `user/repo` shortcuts or full URLs |
+### Core Metadata:
+- **name**: Unique package identifier.
+- **version**: Semantic version (e.g., "1.0.0").
+- **author**: Developer name (synced with registry).
+- **main**: Path to the primary source file (default: `src/main.xcx`).
+- **deps**: List of dependencies. Supported formats:
+    - `name`: Fetches latest from `pax.xcxlang.com`.
+    - `name@version`: Fetches specific version.
+    - `user/repo`: GitHub shortcut.
 
-### Dependency formats
+## Command Reference
 
-```pax
-deps :: [
-    "username/repository",                          --- GitHub shortcut
-    "https://raw.githubusercontent.com/..."         --- direct URL
-]
-```
+### Core Commands
+| Command                | Description                                          |
+|------------------------|------------------------------------------------------|
+| `xcx pax new <name>`    | Generates a professional project structure.           |
+| `xcx pax install`        | Installs deps (minimum library files only).         |
+| `xcx pax clone <name>`   | Clones the entire package repository/structure.      |
+| `xcx pax add <dep>`      | Adds a dep (supports `@version`) and installs it.     |
+| `xcx pax remove <name>`  | Removes a package from `project.pax` and `pax.lock`.  |
+| `xcx pax search <query>` | Searches the PAX Registry (`pax.xcxlang.com`).      |
+| `xcx pax run [path]`    | Executes the project (entry defined in `main`).      |
 
-The GitHub shortcut `user/repo` resolves to:
-```
-https://raw.githubusercontent.com/user/repo/main/package.xcx
-```
+### Registry Commands (Authentication Required)
+| Command                | Description                                          |
+|------------------------|------------------------------------------------------|
+| `xcx pax login <token>` | Saves your API token for publishing.                 |
+| `xcx pax logout`        | Clears the stored session.                           |
+| `xcx pax whoami`        | Verifies your registry account and role.             |
+| `xcx pax publish`       | Pushes your project manifest to the registry.        |
 
----
+## Deterministic Builds: `pax.lock`
 
-## Project Structure
+When you run `install` or `add`, PAX generates a `pax.lock` file. This file "locks" your dependencies to specific versions and source files, ensuring that everyone on your team has exactly the same environment. **Always commit your `pax.lock` to version control.**
 
-Running `xcx pax new MyApp` creates the following layout:
-
-```
-MyApp/
-├── project.pax       # Project configuration and dependencies
-├── src/
-│   └── main.xcx      # Entry point
-└── lib/              # Downloaded packages (created on install)
-```
-
----
-
-## Examples
-
-### Creating and running a new project
-
-```bash
-xcx pax new HelloWorld
-cd HelloWorld
-xcx pax run
-# → Hello from HelloWorld!
-```
-
-### Adding a package from GitHub
-
-```bash
-xcx pax add someuser/xcx-http-utils
-# Downloads the package and updates project.pax automatically
-```
-
-### Installing dependencies after cloning a repo
-
-```bash
-git clone https://github.com/you/your-project
-cd your-project
-xcx pax install
-xcx pax run
-```
-
-### Searching for packages
-
-```bash
-xcx pax search crypto
-# Found 3 packages:
-# - alice/xcx-crypto (Stars: 42)
-#   Cryptographic utilities for XCX
-#   URL: https://github.com/alice/xcx-crypto
-```
-
-### Running a specific file
-
-```bash
-xcx pax run src/server.xcx
-```
-
----
-
-## How It Works
-
-PAX is implemented entirely in XCX 2.0 (`pax.xcx`). It uses the XCX standard library — `store` for file I/O, `net` for HTTP requests, and `crypto` for generating unique filenames — with no external dependencies.
-
-When you run `xcx pax install`, PAX:
-
-1. Reads and parses `project.pax`
-2. Resolves each dependency to a full URL
-3. Downloads each package via HTTP (`net.get`)
-4. Saves it to the `lib/` directory with a unique filename
-
----
-
-## Notes
-
-- Downloaded packages are saved as `lib/pkg_<hash>.xcx`. The hash is a 4-byte random token generated by `crypto.token(4)` to avoid filename collisions.
-- PAX does not currently support versioning — it always fetches the latest version from the `main` branch.
-- Absolute paths and path traversal (`..`) are blocked by the XCX VM.
-
----
-
-## Contributing
-
-PAX is part of the XCX language project. Contributions, bug reports, and package submissions are welcome.
-
----
-
-## License
-
-Part of the XCX 2.0 language distribution.
+## Directory Structure
+- `project.pax`: Main configuration.
+- `pax.lock`: Dependency lockfile.
+- `src/`: Source code.
+- `lib/`: Downloaded dependencies (standard format: `lib/[package_name]/`).
+- `README.md`: Project documentation.
