@@ -1,0 +1,14 @@
+---
+PAX Project Configuration
+*---
+/
+    name        :: "pax",
+    version     :: "4.2.0",
+    author      :: "xcx-official",
+    description :: "PAX project",
+    tags  :: [],
+    files :: [],
+    deps  :: [
+
+    ]
+/
